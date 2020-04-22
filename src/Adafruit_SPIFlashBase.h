@@ -61,7 +61,8 @@ public:
   bool writeEnable(void);
 
   uint32_t getJEDECID(void);
-
+  uint32_t getJEDECID_direct(void);
+	
   uint32_t readBuffer(uint32_t address, uint8_t *buffer, uint32_t len);
   uint32_t writeBuffer(uint32_t address, uint8_t const *buffer, uint32_t len);
 
@@ -73,10 +74,14 @@ public:
   uint8_t read8(uint32_t addr);
   uint16_t read16(uint32_t addr);
   uint32_t read32(uint32_t addr);
+	
+	void StandbyMode(bool pState);
 
 private:
   Adafruit_FlashTransport *_trans;
   SPIFlash_Device_t const *_flash_dev;
+	
+	bool StandbyModeActive=false;
 };
 
 // for debugging

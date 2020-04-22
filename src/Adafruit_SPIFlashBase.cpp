@@ -62,7 +62,9 @@ bool Adafruit_SPIFlashBase::begin(SPIFlash_Device_t const *flash_dev) {
     return false;
 
   _trans->begin();
-
+	
+	StandbyMode(false);
+	
   if (flash_dev != NULL) {
     _flash_dev = flash_dev;
   } else {
@@ -158,6 +160,15 @@ uint32_t Adafruit_SPIFlashBase::getJEDECID(void) {
   return (_flash_dev->manufacturer_id << 16) | (_flash_dev->memory_type << 8) |
          _flash_dev->capacity;
 }
+
+uint32_t Adafruit_SPIFlashBase::getJEDECID_direct(void)
+{
+	uint8_t jedec_ids[3];
+	_trans->readCommand(SFLASH_CMD_READ_JEDEC_ID, jedec_ids, 3);
+	
+	return (jedec_ids[0] << 16) | (jedec_ids[1] << 8) | (jedec_ids[2] << 0);
+}
+
 
 uint8_t Adafruit_SPIFlashBase::readStatus() {
   uint8_t status;
@@ -274,4 +285,22 @@ uint32_t Adafruit_SPIFlashBase::writeBuffer(uint32_t address,
   }
 
   return len - remain;
+}
+
+void Adafruit_SPIFlashBase::StandbyMode(bool pState)
+{	
+	if (pState)
+	{
+		StandbyModeActive = true;
+
+		uint8_t pd_data[1] = {0x00};			
+	  _trans->readCommand(SFLASH_CMD_POWER_DOWN, pd_data, 0);
+	}
+	else
+	{
+		StandbyModeActive = false;
+
+		uint8_t wake_data[4] = { 0x00, 0x00, 0x00, 0x00 };
+		_trans->readCommand(SFLASH_CMD_RELEASE_POWER_DOWN, wake_data, 4);		
+	}	
 }
